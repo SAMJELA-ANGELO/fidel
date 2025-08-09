@@ -6,17 +6,19 @@ const Category = require('../models/Category');
 
 exports.createProduct = async (req, res) => {
   try {
-    let imageUrl = '';
-    if (req.file) {
-      try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'products',
-        });
-        console.log('Cloudinary upload result:', result);
-        imageUrl = result.secure_url;
-      } catch (uploadErr) {
-        console.error('Cloudinary upload error:', uploadErr);
-        return res.status(500).json({ error: 'Image upload failed', details: uploadErr.message });
+    let images = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        try {
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: 'products',
+          });
+          console.log('Cloudinary upload result:', result);
+          images.push(result.secure_url);
+        } catch (uploadErr) {
+          console.error('Cloudinary upload error:', uploadErr);
+          return res.status(500).json({ error: 'Image upload failed', details: uploadErr.message });
+        }
       }
     }
     let category = req.body.category;
@@ -29,7 +31,7 @@ exports.createProduct = async (req, res) => {
     const product = new Product({
       ...req.body,
       category,
-      imageUrl,
+      images,
     });
     await product.save();
     res.status(201).json(product);
@@ -69,16 +71,19 @@ exports.getProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     let update = { ...req.body };
-    if (req.file) {
-      try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'products',
-        });
-        console.log('Cloudinary upload result:', result);
-        update.imageUrl = result.secure_url;
-      } catch (uploadErr) {
-        console.error('Cloudinary upload error:', uploadErr);
-        return res.status(500).json({ error: 'Image upload failed', details: uploadErr.message });
+    if (req.files && req.files.length > 0) {
+      update.images = [];
+      for (const file of req.files) {
+        try {
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: 'products',
+          });
+          console.log('Cloudinary upload result:', result);
+          update.images.push(result.secure_url);
+        } catch (uploadErr) {
+          console.error('Cloudinary upload error:', uploadErr);
+          return res.status(500).json({ error: 'Image upload failed', details: uploadErr.message });
+        }
       }
     }
     if (update.category && !update.category.match(/^[0-9a-fA-F]{24}$/)) {

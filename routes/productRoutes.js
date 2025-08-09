@@ -5,6 +5,7 @@ const productController = require('../controllers/productController');
 
 
 const router = express.Router();
+
 const upload = multer({ dest: 'uploads/' });
 
 /**
@@ -37,9 +38,11 @@ const upload = multer({ dest: 'uploads/' });
  *                 type: number
  *               category:
  *                 type: string
- *               image:
- *                 type: string
- *                 format: binary
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
  *     responses:
  *       201:
  *         description: Product created
@@ -48,7 +51,7 @@ const upload = multer({ dest: 'uploads/' });
  */
 
 
-router.post('/', upload.single('image'), productController.createProduct);
+router.post('/', upload.array('images', 10), productController.createProduct);
 
 /**
  * @swagger
@@ -128,9 +131,11 @@ router.get('/:id', productController.getProduct);
  *                 type: number
  *               category:
  *                 type: string
- *               image:
- *                 type: string
- *                 format: binary
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
  *     responses:
  *       200:
  *         description: Product updated
@@ -139,7 +144,7 @@ router.get('/:id', productController.getProduct);
  *       500:
  *         description: Server error
  */
-router.put('/:id', upload.single('image'), productController.updateProduct);
+router.put('/:id', upload.array('images', 10), productController.updateProduct);
 
 /**
  * @swagger
