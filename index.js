@@ -12,15 +12,12 @@ const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const { url } = require('./config/cloudinary');
 
 
 const app = express();
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -34,6 +31,7 @@ const swaggerOptions = {
     },
     servers: [
       { url: 'http://localhost:' + (process.env.PORT || 5000) },
+      {url:'https://fidel-of6u.onrender.com'}
     ],
   },
   apis: ['./routes/*.js', './models/*.js'],
