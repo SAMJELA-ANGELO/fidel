@@ -58,6 +58,15 @@ exports.getProducts = async (req, res) => {
   }
 };
 
+exports.getProductCount = async (req, res) => {
+  try {
+    const count = await Product.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate('category');

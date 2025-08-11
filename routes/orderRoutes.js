@@ -79,6 +79,27 @@ router.get('/', orderController.getOrders);
 
 /**
  * @swagger
+ * /api/orders/count:
+ *   get:
+ *     summary: Get total count of orders
+ *     tags: [Orders]
+ *     responses:
+ *       200:
+ *         description: Order count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: number
+ *       500:
+ *         description: Server error
+ */
+router.get('/count', orderController.getOrderCount);
+
+/**
+ * @swagger
  * /api/orders/{id}:
  *   get:
  *     summary: Get an order by ID
