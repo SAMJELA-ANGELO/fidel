@@ -80,6 +80,27 @@ router.get('/', productController.getProducts);
 
 /**
  * @swagger
+ * /api/products/count:
+ *   get:
+ *     summary: Get total count of products
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Product count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: number
+ *       500:
+ *         description: Server error
+ */
+router.get('/count', productController.getProductCount);
+
+/**
+ * @swagger
  * /api/products/{id}:
  *   get:
  *     summary: Get a product by ID

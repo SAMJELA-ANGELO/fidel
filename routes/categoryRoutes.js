@@ -51,6 +51,27 @@ router.get('/', categoryController.getCategories);
 
 /**
  * @swagger
+ * /api/categories/count:
+ *   get:
+ *     summary: Get total count of categories
+ *     tags: [Categories]
+ *     responses:
+ *       200:
+ *         description: Category count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: number
+ *       500:
+ *         description: Server error
+ */
+router.get('/count', categoryController.getCategoryCount);
+
+/**
+ * @swagger
  * /api/categories/{id}:
  *   get:
  *     summary: Get a category by ID

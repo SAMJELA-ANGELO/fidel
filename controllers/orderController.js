@@ -20,6 +20,15 @@ exports.getOrders = async (req, res) => {
   }
 };
 
+exports.getOrderCount = async (req, res) => {
+  try {
+    const count = await Order.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).populate('products.product');

@@ -20,6 +20,15 @@ exports.getCategories = async (req, res) => {
   }
 };
 
+exports.getCategoryCount = async (req, res) => {
+  try {
+    const count = await Category.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getCategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
