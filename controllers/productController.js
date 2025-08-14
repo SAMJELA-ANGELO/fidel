@@ -49,7 +49,18 @@ exports.getProducts = async (req, res) => {
       filter.name = { $regex: search, $options: 'i' };
     }
     if (category) {
-      filter.category = category;
+      // If category is not ObjectId, look up by name
+      if (!category.match(/^[0-9a-fA-F]{24}$/)) {
+        const found = await Category.findOne({ name: category });
+        if (found) {
+          filter.category = found._id;
+        } else {
+          // No matching category, return empty
+          return res.json([]);
+        }
+      } else {
+        filter.category = category;
+      }
     }
     const products = await Product.find(filter).populate('category');
     res.json(products);
