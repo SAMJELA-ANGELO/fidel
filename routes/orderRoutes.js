@@ -23,43 +23,50 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               user:
- *                 type: string
- *               products:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     product:
- *                       type: string
- *                     quantity:
- *                       type: number
- *               status:
- *                 type: string
- *               total:
- *                 type: number
- *               billingAddress:
- *                 type: object
- *                 properties:
- *                   fullName:
- *                     type: string
- *                   addressLine1:
- *                     type: string
- *                   addressLine2:
- *                     type: string
- *                   city:
- *                     type: string
- *                   state:
- *                     type: string
- *                   postalCode:
- *                     type: string
- *                   country:
- *                     type: string
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               country: { type: string }
+ *               city: { type: string }
+ *               state: { type: string }
+ *               companyName: { type: string }
+ *               postcode: { type: string }
+ *               phone: { type: string }
+ *               email: { type: string, description: "Recipient email address for order/invoice" }
+ *               orderNote: { type: string }
+ *               scheduledDelivery: { type: object, properties: { date: { type: string }, note: { type: string } } }
+ *               paymentMethod: { type: string }
+ *               products: { type: array, items: { type: object, properties: { name: { type: string }, quantity: { type: number }, price: { type: number } } } }
+ *               total: { type: number }
  *     responses:
  *       201:
  *         description: Order created
  *       500:
- *         description: Server error
+ *         description: Error
+ *
+ * /api/orders/{id}/invoice:
+ *   put:
+ *     summary: Admin edit and resend invoice
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               invoiceData: { type: object }
+ *               toEmail: { type: string, description: "Recipient email address for invoice" }
+ *     responses:
+ *       200:
+ *         description: Invoice sent
+ *       500:
+ *         description: Error
  */
 router.post('/', orderController.createOrder);
 
@@ -188,5 +195,107 @@ router.put('/:id', orderController.updateOrder);
  *         description: Server error
  */
 router.delete('/:id', orderController.deleteOrder);
+
+/**
+ * @swagger
+ * /api/orders/{id}/invoice:
+ *   put:
+ *     summary: Edit and resend invoice for an order (Admin)
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user:
+ *                 type: string
+ *               products:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     product:
+ *                       type: string
+ *                     quantity:
+ *                       type: number
+ *               status:
+ *                 type: string
+ *               total:
+ *                 type: number
+ *               billingAddress:
+ *                 type: object
+ *                 properties:
+ *                   fullName:
+ *                     type: string
+ *                   addressLine1:
+ *                     type: string
+ *                   addressLine2:
+ *                     type: string
+ *                   city:
+ *                     type: string
+ *                   state:
+ *                     type: string
+ *                   postalCode:
+ *                     type: string
+ *                   country:
+ *                     type: string
+ *     responses:
+ *       200:
+ *         description: Invoice edited and resent
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Server error
+ */
+router.put('/:id/invoice', orderController.editAndSendInvoice);
+
+/**
+ * @swagger
+ * /api/email/test:
+ *   post:
+ *     summary: Send a test email using Mailjet
+ *     tags: [Email]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               toEmail: { type: string, description: "Recipient email address" }
+ *               subject: { type: string, description: "Email subject" }
+ *               text: { type: string, description: "Plain text body" }
+ *               html: { type: string, description: "HTML body (optional)" }
+ *     responses:
+ *       200:
+ *         description: Email sent successfully
+ *       500:
+ *         description: Error sending email
+ */
+
+// Test email endpoint
+router.post('/email/test', async (req, res) => {
+	const { toEmail, subject, text, html } = req.body;
+	try {
+		await mailService.sendMail({
+			to: toEmail,
+			subject,
+			text,
+			html,
+		});
+		res.status(200).json({ message: 'Email sent successfully' });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+});
 
 module.exports = router;

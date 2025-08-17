@@ -1,11 +1,30 @@
 // controllers/cartController.js
 const Cart = require('../models/Cart');
 
-exports.createCart = async (req, res) => {
+exports.createOrUpdateCart = async (req, res) => {
   try {
-    const cart = new Cart(req.body);
-    await cart.save();
-    res.status(201).json(cart);
+    const { sessionId, products } = req.body;
+    if (!sessionId) return res.status(400).json({ error: 'sessionId required' });
+    let cart = await Cart.findOne({ sessionId, status: 'active' });
+    if (cart) {
+      // Update cart: merge products
+      products.forEach(newItem => {
+        const idx = cart.products.findIndex(p => String(p.product) === String(newItem.product));
+        if (idx > -1) {
+          cart.products[idx].quantity += newItem.quantity || 1;
+        } else {
+          cart.products.push(newItem);
+        }
+      });
+      cart.updatedAt = Date.now();
+      await cart.save();
+      return res.json(cart);
+    } else {
+      // Create new cart
+      cart = new Cart({ sessionId, products });
+      await cart.save();
+      return res.status(201).json(cart);
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
