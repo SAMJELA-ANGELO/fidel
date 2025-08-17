@@ -12,6 +12,7 @@ const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const blogRoutes = require('./routes/blogRoutes');
 const { url } = require('./config/cloudinary');
 
 
@@ -44,6 +45,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/carts', cartRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/blogs', blogRoutes);
 
 const PORT = process.env.PORT || 5000;
 

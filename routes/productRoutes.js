@@ -38,6 +38,12 @@ const upload = multer({ dest: 'uploads/' });
  *                 type: number
  *               category:
  *                 type: string
+ *               rating:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 5
+ *                 default: 5
+ *                 description: Product rating (1-5)
  *               images:
  *                 type: array
  *                 items:
@@ -115,6 +121,31 @@ router.get('/count', productController.getProductCount);
  *     responses:
  *       200:
  *         description: Product found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                 price:
+ *                   type: number
+ *                 category:
+ *                   type: string
+ *                 rating:
+ *                   type: number
+ *                   minimum: 1
+ *                   maximum: 5
+ *                   default: 5
+ *                   description: Product rating (1-5)
+ *                 images:
+ *                   type: array
+ *                   items:
+ *                     type: string
  *       404:
  *         description: Not found
  *       500:

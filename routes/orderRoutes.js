@@ -23,23 +23,31 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               firstName: { type: string }
- *               lastName: { type: string }
+ *               cartId: { type: string, description: "Cart ID (_id) for cart lookup (required)" }
+ *               firstName: { type: string, description: "Customer first name" }
+ *               lastName: { type: string, description: "Customer last name" }
  *               country: { type: string }
  *               city: { type: string }
  *               state: { type: string }
  *               companyName: { type: string }
  *               postcode: { type: string }
  *               phone: { type: string }
- *               email: { type: string, description: "Recipient email address for order/invoice" }
+ *               email: { type: string, description: "Customer email address (used for invoice)" }
  *               orderNote: { type: string }
- *               scheduledDelivery: { type: object, properties: { date: { type: string }, note: { type: string } } }
+ *               scheduledDelivery: {
+ *                 type: object,
+ *                 properties: {
+ *                   date: { type: string },
+ *                   note: { type: string }
+ *                 }
+ *               }
  *               paymentMethod: { type: string }
- *               products: { type: array, items: { type: object, properties: { name: { type: string }, quantity: { type: number }, price: { type: number } } } }
- *               total: { type: number }
+ *               total: { type: number, description: "Order total amount" }
  *     responses:
  *       201:
  *         description: Order created
+ *       400:
+ *         description: Cart not found or empty
  *       500:
  *         description: Error
  *
