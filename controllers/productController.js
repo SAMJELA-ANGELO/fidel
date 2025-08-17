@@ -91,29 +91,35 @@ exports.getProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     let update = { ...req.body };
+    let existingProduct = await Product.findById(req.params.id);
+    if (!existingProduct) return res.status(404).json({ error: 'Not found' });
+    // Handle image removal
+    if (update.imagesToKeep) {
+      existingProduct.images = existingProduct.images.filter(img => update.imagesToKeep.includes(img));
+    }
+    // Handle new image uploads
     if (req.files && req.files.length > 0) {
-      update.images = [];
       for (const file of req.files) {
         try {
           const result = await cloudinary.uploader.upload(file.path, {
             folder: 'products',
           });
-          console.log('Cloudinary upload result:', result);
-          update.images.push(result.secure_url);
+          existingProduct.images.push(result.secure_url);
         } catch (uploadErr) {
           console.error('Cloudinary upload error:', uploadErr);
           return res.status(500).json({ error: 'Image upload failed', details: uploadErr.message });
         }
       }
     }
+    // Update other fields
     if (update.category && !update.category.match(/^[0-9a-fA-F]{24}$/)) {
       const found = await Category.findOne({ name: update.category });
       if (!found) return res.status(400).json({ error: 'Category not found' });
       update.category = found._id;
     }
-    const product = await Product.findByIdAndUpdate(req.params.id, update, { new: true });
-    if (!product) return res.status(404).json({ error: 'Not found' });
-    res.json(product);
+    Object.assign(existingProduct, update);
+    await existingProduct.save();
+    res.json(existingProduct);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -40,7 +40,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.post('/', cartController.createCart);
+router.post('/', cartController.createOrUpdateCart);
 
 /**
  * @swagger
@@ -142,5 +142,41 @@ router.put('/:id', cartController.updateCart);
  *         description: Server error
  */
 router.delete('/:id', cartController.deleteCart);
+
+/**
+ * @swagger
+ * /api/cart:
+ *   post:
+ *     summary: Create or update cart for session
+ *     tags: [Cart]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sessionId: { type: string }
+ *               products: { type: array, items: { type: object, properties: { productId: { type: string }, quantity: { type: number } } } }
+ *     responses:
+ *       200:
+ *         description: Cart updated/created
+ *       500:
+ *         description: Error
+ *   get:
+ *     summary: Get cart by sessionId
+ *     tags: [Cart]
+ *     parameters:
+ *       - in: query
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Cart data
+ *       404:
+ *         description: Cart not found
+ */
 
 module.exports = router;

@@ -190,4 +190,56 @@ router.put('/:id', upload.array('images', 10), productController.updateProduct);
  */
 router.delete('/:id', productController.deleteProduct);
 
+/**
+ * @swagger
+ * /api/products/{id}/images:
+ *   put:
+ *     summary: Edit product images (add/remove)
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               addImages: { type: array, items: { type: string } }
+ *               removeImages: { type: array, items: { type: string } }
+ *     responses:
+ *       200:
+ *         description: Images updated
+ *       500:
+ *         description: Error
+ *
+ * /api/products/{id}/rating:
+ *   put:
+ *     summary: Update product rating
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rating: { type: number }
+ *     responses:
+ *       200:
+ *         description: Rating updated
+ *       500:
+ *         description: Error
+ */
+
 module.exports = router;
