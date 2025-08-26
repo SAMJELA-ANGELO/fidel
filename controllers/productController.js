@@ -47,6 +47,7 @@ exports.createProduct = async (req, res) => {
       category,
       images,
       flavours,
+      weight: req.body.weight,
     });
     await product.save();
     res.status(201).json(product);
@@ -119,7 +120,7 @@ exports.updateProduct = async (req, res) => {
     const isObjectId = mongoose.Types.ObjectId.isValid(slugOrId);
     const query = isObjectId ? { _id: slugOrId } : { slug: slugOrId };
 
-    let existingProduct = await Product.findOneAndUpdate(query, update, { new: true });
+  let existingProduct = await Product.findOneAndUpdate(query, update, { new: true });
 
     if (!existingProduct) return res.status(404).json({ error: 'Not found' });
     // Handle image removal
@@ -147,6 +148,9 @@ exports.updateProduct = async (req, res) => {
       update.category = found._id;
     }
     Object.assign(existingProduct, update);
+    if (update.weight !== undefined) {
+      existingProduct.weight = update.weight;
+    }
     await existingProduct.save();
     res.json(existingProduct);
   } catch (err) {
