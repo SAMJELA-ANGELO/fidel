@@ -94,8 +94,8 @@ const upload = multer({ dest: 'uploads/' });
 
 router.post('/', upload.array('images'), blogController.createBlog);
 router.get('/', blogController.getBlogs);
-router.get('/:id', blogController.getBlog);
-router.put('/:id', upload.array('images'), blogController.updateBlog);
-router.delete('/:id', blogController.deleteBlog);
+router.get('/:slugOrId', blogController.getBlog);
+router.put('/:slugOrId', upload.array('images'), blogController.updateBlog);
+router.delete('/:slugOrId', blogController.deleteBlog);
 
 module.exports = router;
