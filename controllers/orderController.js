@@ -106,17 +106,17 @@ exports.createOrder = async (req, res) => {
     `;
     // Send to admin
     await sendEmail({
-      to: 'INFO@FIDELSCLOTHINGS.COM',
+      to: 'INFO@fidelshashhole.ai',
       subject: 'New Order Received',
       html: invoiceHtml,
-      from: 'INFO@FIDELSCLOTHINGS.COM'
+      from: 'INFO@fidelshashhole.ai'
     });
     // Send to user
     await sendEmail({
       to: email,
       subject: 'Your Order Invoice',
       html: invoiceHtml,
-      from: 'INFO@FIDELSCLOTHINGS.COM'
+      from: 'INFO@fidelshashhole.ai'
     });
     // Delete cart after order
     await Cart.findByIdAndDelete(cart._id);
@@ -256,7 +256,7 @@ exports.editAndSendInvoice = async (req, res) => {
       to: toEmail,
       subject: 'Order Invoice',
       html: invoiceHtml,
-      from: 'INFO@FIDELSCLOTHINGS.COM'
+      from: 'INFO@fidelshashhole.ai'
     });
     res.json({ message: 'Invoice sent' });
   } catch (err) {

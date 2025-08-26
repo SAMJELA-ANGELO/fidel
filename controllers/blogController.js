@@ -1,9 +1,13 @@
 const Blog = require('../models/Blog');
 const cloudinary = require('../config/cloudinary');
+const slugify = require('slugify');
+const mongoose = require('mongoose');
 
 exports.createBlog = async (req, res) => {
   try {
     const { title, content, author, hashtags } = req.body;
+    const slug = slugify(title, { lower: true, strict: true });
+
     let images = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
@@ -18,7 +22,7 @@ exports.createBlog = async (req, res) => {
         }
       }
     }
-    const blog = new Blog({ title, content, author, images, hashtags });
+    const blog = new Blog({ title, slug, content, author, images, hashtags });
     await blog.save();
     res.status(201).json(blog);
   } catch (err) {
@@ -37,7 +41,12 @@ exports.getBlogs = async (req, res) => {
 
 exports.getBlog = async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id);
+    const { slugOrId } = req.params;
+    const isObjectId = mongoose.Types.ObjectId.isValid(slugOrId);
+
+    const query = isObjectId ? { _id: slugOrId } : { slug: slugOrId };
+    const blog = await Blog.findOne(query);
+
     if (!blog) return res.status(404).json({ error: 'Blog not found' });
     res.json(blog);
   } catch (err) {
@@ -47,16 +56,35 @@ exports.getBlog = async (req, res) => {
 
 exports.updateBlog = async (req, res) => {
   try {
+    const { slugOrId } = req.params;
     const { title, content, author, hashtags } = req.body;
-    let images = [];
-    if (req.files && req.files.length > 0) {
-      images = req.files.map(file => file.path);
+    const updateData = { title, content, author, hashtags, updatedAt: Date.now() };
+
+    if (title) {
+      updateData.slug = slugify(title, { lower: true, strict: true });
     }
-    const blog = await Blog.findByIdAndUpdate(
-      req.params.id,
-      { title, content, author, images, hashtags, updatedAt: Date.now() },
-      { new: true }
-    );
+
+    if (req.files && req.files.length > 0) {
+      let images = [];
+      for (const file of req.files) {
+        try {
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: 'blogs',
+          });
+          images.push(result.secure_url);
+        } catch (uploadErr) {
+          console.error('Cloudinary upload error:', uploadErr);
+          return res.status(500).json({ error: 'Image upload failed', details: uploadErr.message });
+        }
+      }
+      updateData.images = images;
+    }
+
+    const isObjectId = mongoose.Types.ObjectId.isValid(slugOrId);
+    const query = isObjectId ? { _id: slugOrId } : { slug: slugOrId };
+
+    const blog = await Blog.findOneAndUpdate(query, updateData, { new: true });
+
     if (!blog) return res.status(404).json({ error: 'Blog not found' });
     res.json(blog);
   } catch (err) {
@@ -66,7 +94,12 @@ exports.updateBlog = async (req, res) => {
 
 exports.deleteBlog = async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndDelete(req.params.id);
+    const { slugOrId } = req.params;
+    const isObjectId = mongoose.Types.ObjectId.isValid(slugOrId);
+
+    const query = isObjectId ? { _id: slugOrId } : { slug: slugOrId };
+    const blog = await Blog.findOneAndDelete(query);
+
     if (!blog) return res.status(404).json({ error: 'Blog not found' });
     res.json({ message: 'Blog deleted' });
   } catch (err) {

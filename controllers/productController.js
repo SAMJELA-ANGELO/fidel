@@ -3,6 +3,8 @@
 const Product = require('../models/Product');
 const cloudinary = require('../config/cloudinary');
 const Category = require('../models/Category');
+const slugify = require('slugify');
+const mongoose = require('mongoose');
 
 exports.createProduct = async (req, res) => {
   try {
@@ -28,10 +30,23 @@ exports.createProduct = async (req, res) => {
       if (!found) return res.status(400).json({ error: 'Category not found' });
       category = found._id;
     }
+    let { flavours, ...otherData } = req.body;
+    if (typeof flavours === 'string') {
+      try {
+        flavours = JSON.parse(flavours);
+      } catch (e) {
+        return res.status(400).json({ error: 'Invalid format for flavours' });
+      }
+    }
+
+    const slug = slugify(otherData.name, { lower: true, strict: true });
+
     const product = new Product({
-      ...req.body,
+      ...otherData,
+      slug,
       category,
       images,
+      flavours,
     });
     await product.save();
     res.status(201).json(product);
@@ -49,11 +64,11 @@ exports.getProducts = async (req, res) => {
       filter.name = { $regex: search, $options: 'i' };
     }
     if (category) {
-      // If category is not ObjectId, look up by name
+      // If category is not ObjectId, look up by partial name (case-insensitive)
       if (!category.match(/^[0-9a-fA-F]{24}$/)) {
-        const found = await Category.findOne({ name: category });
-        if (found) {
-          filter.category = found._id;
+        const foundCategories = await Category.find({ name: { $regex: category, $options: 'i' } });
+        if (foundCategories.length > 0) {
+          filter.category = { $in: foundCategories.map(cat => cat._id) };
         } else {
           // No matching category, return empty
           return res.json([]);
@@ -80,7 +95,12 @@ exports.getProductCount = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('category');
+    const { slugOrId } = req.params;
+    const isObjectId = mongoose.Types.ObjectId.isValid(slugOrId);
+
+    const query = isObjectId ? { _id: slugOrId } : { slug: slugOrId };
+    const product = await Product.findOne(query).populate('category');
+
     if (!product) return res.status(404).json({ error: 'Not found' });
     res.json(product);
   } catch (err) {
@@ -90,8 +110,17 @@ exports.getProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
+    const { slugOrId } = req.params;
     let update = { ...req.body };
-    let existingProduct = await Product.findById(req.params.id);
+    if (update.name) {
+      update.slug = slugify(update.name, { lower: true, strict: true });
+    }
+
+    const isObjectId = mongoose.Types.ObjectId.isValid(slugOrId);
+    const query = isObjectId ? { _id: slugOrId } : { slug: slugOrId };
+
+    let existingProduct = await Product.findOneAndUpdate(query, update, { new: true });
+
     if (!existingProduct) return res.status(404).json({ error: 'Not found' });
     // Handle image removal
     if (update.imagesToKeep) {
@@ -127,7 +156,12 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const { slugOrId } = req.params;
+    const isObjectId = mongoose.Types.ObjectId.isValid(slugOrId);
+
+    const query = isObjectId ? { _id: slugOrId } : { slug: slugOrId };
+    const product = await Product.findOneAndDelete(query);
+
     if (!product) return res.status(404).json({ error: 'Not found' });
     res.json({ message: 'Deleted' });
   } catch (err) {

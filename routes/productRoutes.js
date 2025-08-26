@@ -151,23 +151,23 @@ router.get('/count', productController.getProductCount);
  *       500:
  *         description: Server error
  */
-router.get('/:id', productController.getProduct);
+router.get('/:slugOrId', productController.getProduct);
 
 /**
  * @swagger
- * /api/products/{id}:
+ * /api/products/{slug}:
  *   put:
- *     summary: Update a product by ID
+ *     summary: Update a product by slug
  *     tags: [Products]
  *     consumes:
  *       - multipart/form-data
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
- *         description: Product ID
+ *         description: Product slug
  *     requestBody:
  *       required: true
  *       content:
@@ -196,21 +196,21 @@ router.get('/:id', productController.getProduct);
  *       500:
  *         description: Server error
  */
-router.put('/:id', upload.array('images', 10), productController.updateProduct);
+router.put('/:slugOrId', upload.array('images', 10), productController.updateProduct);
 
 /**
  * @swagger
- * /api/products/{id}:
+ * /api/products/{slug}:
  *   delete:
- *     summary: Delete a product by ID
+ *     summary: Delete a product by slug
  *     tags: [Products]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
- *         description: Product ID
+ *         description: Product slug
  *     responses:
  *       200:
  *         description: Product deleted
@@ -219,7 +219,7 @@ router.put('/:id', upload.array('images', 10), productController.updateProduct);
  *       500:
  *         description: Server error
  */
-router.delete('/:id', productController.deleteProduct);
+router.delete('/:slugOrId', productController.deleteProduct);
 
 /**
  * @swagger
